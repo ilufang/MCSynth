@@ -1,0 +1,17 @@
+resampler a.wav	nul 100 100 GN 0 100
+resampler a.wav fourtick.wav F#3 200 N  <oto1> 100 <oto2> <oto3>
+
+wavtool onetick.wav fourtick.wav 0 60 0 5 35 0 100 100 0 0
+copy /Y onetick.wav.whd /B + onetick.wav.dat /B onetick_head.wav
+del onetick.wav.whd
+del onetick.wav.dat
+
+wavtool onetick.wav fourtick.wav 100 60 0 5 35 0 100 100 0 0
+copy /Y onetick.wav.whd /B + onetick.wav.dat /B onetick_body.wav
+del onetick.wav.whd
+del onetick.wav.dat
+
+
+
+
+copy /Y temp.wav.whd /B + temp.wav.dat /B temp.wav

@@ -1,0 +1,215 @@
+#
+# CONSTS
+# status:
+# 0 - Stdby
+# 1 - Ready
+# 2 - Next
+# 3 - Prev
+# 8 - Ended
+# 9 - Attempt to finalize
+# 10 - Finalize
+#
+# jumpflag:
+# 0 - Stdby
+# 1 - Act/Deact chunk
+# 2 - Allocate chunk
+#
+
+INIT:/gamerule commandBlockOutput false
+INIT:/gamerule sendCommandFeedback false
+INIT:/difficulty peaceful
+INIT:/gamerule doFireTick false
+INIT:/gamerule mobGriefing false
+INIT:/gamerule doMobLoot false
+
+INIT:/scoreboard objectives add status dummy
+INIT:/scoreboard objectives add jumpflag dummy
+INIT:/scoreboard objectives add posbar dummy
+INIT:/scoreboard objectives add frontline dummy
+INIT:/scoreboard objectives add setpos dummy
+INIT:/scoreboard objectives add pos dummy
+INIT:/scoreboard objectives add settrack dummy
+INIT:/scoreboard objectives add track dummy
+INIT:/scoreboard objectives add soundfont dummy
+INIT:/scoreboard objectives add setsoundfont dummy
+INIT:/scoreboard objectives add chatcmd dummy
+INIT:/scoreboard objectives add setnote dummy
+INIT:/scoreboard objectives add temp dummy
+INIT:/scoreboard objectives add notelength dummy
+INIT:/scoreboard objectives add autoplace dummy
+
+INIT:/scoreboard objectives add info dummy MCSynth
+INIT:/scoreboard objectives add vars dummy
+
+INIT:/scoreboard players set @a status 0
+INIT:/scoreboard players set @a jumpflag 0
+INIT:/scoreboard players set @a posbar 0
+INIT:/scoreboard players set @a frontline 0
+INIT:/scoreboard players set @a setpos -1
+INIT:/scoreboard players set @a settrack -1
+INIT:/scoreboard players set @a pos 0
+INIT:/scoreboard players set @a track 7
+INIT:/scoreboard players set @a soundfont 0
+INIT:/scoreboard players set @a setsoundfont -1
+INIT:/scoreboard players set @a chatcmd -1
+INIT:/scoreboard players set @a setnote -1
+INIT:/scoreboard players set installedsoundfonts vars 0
+INIT:/scoreboard players set @a notelength 1
+INIT:/scoreboard players set @a autoplace -1
+
+INIT:/scoreboard players set NoteLength info 1
+
+INIT:/scoreboard objectives setdisplay sidebar info
+
+INIT:/tellraw @p ["",{"text":"Minecraft Synth\n","color":"aqua","bold":true},{"text":"In-game command block music creator\n\n","color":"aqua","bold":false},{"text":"By ilufang\n\n","color":"green"},{"text":"Note: This mod won't work unless you have all components installed. Please read the instructions ","color":"none"},{"text":"here","underlined":true,"clickEvent":{"action":"open_url","value":"https://github.com/ilufang/MCSynth"},"color":"none"}]
+
+INIT:/give @p spawn_egg 1 93 {display:{Name:"START"}}
+
+# INIT:/setblock ~2 ~ ~ command_block
+# INIT:/setblock ~1 ~ ~ wall_sign 4 replace {Text1:"Place",Text2:"Piano Roll",Text3:"Code",Text4:"Here"}
+INIT:/setblock ~ ~-3 ~-4 command_block
+
+# Global
+
+/effect @e[name=SynthWizard] 11 10 10
+/effect @e[name=SynthWorker] 11 10 10
+/execute @a ~ ~ ~ kill @e[r=10,type=Item]
+
+/scoreboard players operation NoteLength info = @p notelength
+
+# START
+
+/execute @p[score_status_min=1] ~ ~ ~ kill @e[name=START]
+/execute @e[name=START] ~ ~ ~ scoreboard players set @a status 1
+/execute @e[name=START] ~ ~ ~ summon ArmorStand ~-6 ~3.5 ~ {NoGravity:1,Invisible:1,CustomName:"StartPos",Rotation:[270f,0f]}
+/execute @e[name=START] ~ ~ ~ summon ArmorStand ~ ~3 ~ {NoGravity:1,Invisible:1,CustomName:"SynthWizard",Rotation:[270f,0f]}
+/execute @e[name=START] ~ ~ ~ summon Villager ~ ~ ~ {NoAI:1,Invulnerable:1,CustomName:"SynthWorker",Rotation:[270f,0f]}
+/execute @e[name=START] ~ ~ ~ scoreboard players set @a jumpflag 2
+/execute @e[name=START] ~ ~ ~ scoreboard players set @a chatcmd 0
+/execute @e[name=START] ~ ~ ~ fill ~-1 ~-3 ~-8 ~-32 ~7 ~8 barrier
+/execute @e[name=START] ~ ~ ~ fill ~-1 ~-2 ~-7 ~-31 ~6 ~7 air
+
+# Finalize
+/execute @p[score_status_min=10] ~ ~ ~ tp @e[name=SynthWizard] ~32 ~ ~
+/execute @p[score_status_min=10] ~ ~ ~ scoreboard players set @a jumpflag 1
+
+# Chat command center
+$gold_block$
+/execute @p[score_chatcmd_min=0] ~ ~ ~ scoreboard players set @a chatcmd -1
+
+# Position calculations
+/execute @p[score_status_min=2,score_status=2] ~ ~ ~ scoreboard players add @a posbar 1
+/execute @p[score_status_min=3,score_status=3] ~ ~ ~ scoreboard players remove @a posbar 1
+/execute @p[score_posbar=-1] ~ ~ ~ scoreboard players set @a status 1
+/execute @p[score_posbar=-1] ~ ~ ~ scoreboard players set @a posbar 0
+/execute @p[score_status_min=2,score_status=2] ~ ~ ~ tp @e[name=SynthWizard] ~32 ~ ~
+/execute @p[score_status_min=3,score_status=3] ~ ~ ~ tp @e[name=SynthWizard] ~-32 ~ ~
+/execute @p[score_status_min=2,score_status=3] ~ ~ ~ scoreboard players set @a jumpflag 1
+/execute @p[score_status_min=2,score_status=3] ~ ~ ~ scoreboard players set @a setpos 0
+
+
+# Region jump
+/execute @p[score_jumpflag_min=1] ~ ~ ~ scoreboard players operation @p frontline -= @p posbar
+/execute @p[score_frontline=-1] ~ ~ ~ scoreboard players set @a jumpflag 2
+/execute @p[score_jumpflag_min=1] ~ ~ ~ scoreboard players operation @p frontline += @p posbar
+/execute @p[score_jumpflag_min=1] ~ ~ ~ scoreboard players operation @p frontline > @p posbar
+/execute @p[score_jumpflag_min=1] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ fill ~-32 ~-1 ~-1 ~-1 ~ ~1 barrier
+/execute @p[score_jumpflag_min=1] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ fill ~-32 ~ ~ ~-1 ~ ~ air
+/execute @p[score_jumpflag_min=1] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ fill ~ ~-1 ~-1 ~31 ~ ~1 air
+
+
+
+# Region init
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ fill ~ ~-6 ~-8 ~32 ~4 ~8 barrier
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ fill ~ ~-5 ~-7 ~31 ~3 ~7 air
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ fill ~ ~-3 ~-8 ~31 ~-3 ~-8 birch_fence
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ fill ~ ~-3 ~8 ~31 ~-3 ~8 birch_fence
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ fill ~ ~-3 ~-8 ~ ~-2 ~-8 acacia_fence
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ fill ~ ~-3 ~8 ~ ~-2 ~8 acacia_fence
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ setblock ~ ~-1 ~-8 glowstone
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ setblock ~ ~-1 ~8 glowstone
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ setblock ~8 ~-3 ~-8 acacia_fence
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ setblock ~16 ~-3 ~-8 acacia_fence
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ setblock ~24 ~-3 ~-8 acacia_fence
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ setblock ~8 ~-3 ~8 acacia_fence
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ setblock ~16 ~-3 ~8 acacia_fence
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ setblock ~24 ~-3 ~8 acacia_fence
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ fill ~ ~-5 ~-7 ~31 ~-5 ~7 planks 2
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ fill ~ ~-5 ~-8 ~31 ~-5 ~-8 command_block 0 replace {Command:"fill ~1 ~ ~1 ~1 ~ ~15 redstone_block"}
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ fill ~ ~-5 ~8 ~31 ~-5 ~8 command_block 0 replace {Command:"fill ~ ~ ~-1 ~ ~ ~-15 planks 2"}
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ fill ~ ~-4 ~-8 ~31 ~-4 ~8 planks 2
+/execute @p[score_jumpflag_min=2] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ fill ~ ~-4 ~-7 ~31 ~-4 ~7 stained_glass 0
+
+# Clear move-related signal flags
+/execute @p[score_jumpflag_min=1] ~ ~ ~ scoreboard players set @a jumpflag 0
+/execute @p[score_status_min=2,score_status=3] ~ ~ ~ scoreboard players set @a status 1
+
+# Position selection
+/execute @p[score_setpos_min=0,score_settrack=-1] ~ ~ ~ scoreboard players operation @p settrack = @p track
+/execute @p[score_settrack_min=0,score_setpos=-1] ~ ~ ~ scoreboard players operation @p setpos = @p pos
+/execute @p[score_setpos_min=0] ~ ~ ~ scoreboard players operation @p pos = @p setpos
+/execute @p[score_setpos_min=0] ~ ~ ~ scoreboard players operation @p track = @p settrack
+
+/execute @p[score_setpos_min=0] ~ ~ ~ tp @e[name=SynthWorker] @e[name=SynthWizard]
+/execute @p[score_setpos_min=0] ~ ~ ~ tp @e[name=SynthWorker] ~ ~-3 ~
+
+/execute @p[score_setpos_min=16,score_setpos=31] ~ ~ ~ tp @e[name=SynthWorker] ~16 ~ ~
+/execute @p[score_setpos_min=16,score_setpos=31] ~ ~ ~ scoreboard players remove @p setpos 16
+/execute @p[score_setpos_min=8,score_setpos=15] ~ ~ ~ tp @e[name=SynthWorker] ~8 ~ ~
+/execute @p[score_setpos_min=8,score_setpos=15] ~ ~ ~ scoreboard players remove @p setpos 8
+/execute @p[score_setpos_min=4,score_setpos=7] ~ ~ ~ tp @e[name=SynthWorker] ~4 ~ ~
+/execute @p[score_setpos_min=4,score_setpos=7] ~ ~ ~ scoreboard players remove @p setpos 4
+/execute @p[score_setpos_min=3,score_setpos=3] ~ ~ ~ tp @e[name=SynthWorker] ~3 ~ ~
+/execute @p[score_setpos_min=2,score_setpos=2] ~ ~ ~ tp @e[name=SynthWorker] ~2 ~ ~
+/execute @p[score_setpos_min=1,score_setpos=1] ~ ~ ~ tp @e[name=SynthWorker] ~1 ~ ~
+
+/execute @p[score_settrack_min=0] ~ ~ ~ tp @e[name=SynthWorker] ~ ~ ~-7
+/execute @p[score_settrack_min=8,score_settrack=15] ~ ~ ~ tp @e[name=SynthWorker] ~ ~ ~8
+/execute @p[score_settrack_min=8,score_settrack=15] ~ ~ ~ scoreboard players remove @p settrack 8
+/execute @p[score_settrack_min=4,score_settrack=7] ~ ~ ~ tp @e[name=SynthWorker] ~ ~ ~4
+/execute @p[score_settrack_min=4,score_settrack=7] ~ ~ ~ scoreboard players remove @p settrack 4
+/execute @p[score_settrack_min=3,score_settrack=3] ~ ~ ~ tp @e[name=SynthWorker] ~ ~ ~3
+/execute @p[score_settrack_min=2,score_settrack=2] ~ ~ ~ tp @e[name=SynthWorker] ~ ~ ~2
+/execute @p[score_settrack_min=1,score_settrack=1] ~ ~ ~ tp @e[name=SynthWorker] ~ ~ ~1
+
+/execute @p[score_setpos_min=0] ~ ~ ~ scoreboard players set @a setnote 0
+
+/execute @p[score_setpos_min=0] ~ ~ ~ scoreboard players set @a setpos -1
+/execute @p[score_settrack_min=0] ~ ~ ~ scoreboard players set @a settrack -1
+
+# Set soundfont
+/execute @p[score_setsoundfont_min=1] ~ ~ ~ scoreboard players operation @a soundfont = @a setsoundfont
+/execute @p[score_setsoundfont_min=1] ~ ~ ~ scoreboard players set @a chatcmd 0
+/execute @p[score_setsoundfont_min=1] ~ ~ ~ scoreboard players set @a setsoundfont 0
+
+# Start, after
+/execute @e[name=START] ~ ~ ~ fill ~-1 ~-2 ~-8 ~-32 ~-2 ~8 planks 2
+/execute @e[name=START] ~ ~ ~ fill ~-1 ~-1 ~-8 ~-32 ~-1 ~8 stained_glass
+/execute @e[name=START] ~ ~ ~ fill ~-1 ~-2 ~-8 ~-1 ~-3 ~8 quartz_block 1
+/execute @e[name=START] ~ ~ ~ fill ~-1 ~3 ~-6 ~-1 ~3 ~6 air
+/execute @e[name=START] ~ ~ ~ fill ~-1 ~4 ~-6 ~-1 ~4 ~6 tripwire
+/execute @e[name=START] ~ ~ ~ setblock ~-1 ~4 ~-7 tripwire_hook
+/execute @e[name=START] ~ ~ ~ setblock ~-1 ~4 ~-8 redstone_lamp
+/execute @e[name=START] ~ ~ ~ setblock ~-1 ~4 ~8 redstone_lamp
+/execute @e[name=START] ~ ~ ~ setblock ~-1 ~3 ~-8 command_block 0 replace {Command:"setblock ~ ~-5 ~ redstone_block"}
+/execute @e[name=START] ~ ~ ~ setblock ~-1 ~3 ~8 command_block 0 replace {Command:"setblock ~ ~-5 ~-16 quartz_block 1"}
+/execute @e[name=START] ~ ~ ~ fill ~-1 ~2 ~-8 ~-1 ~-1 ~-8 quartz_block 1
+/execute @e[name=START] ~ ~ ~ fill ~-1 ~2 ~8 ~-1 ~-1 ~8 quartz_block 1
+
+
+/execute @e[name=START] ~ ~ ~ kill @e[name=START]
+
+# Finalize, after
+
+/execute @p[score_status_min=10] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ fill ~ ~-6 ~-8 ~ ~4 ~8 air
+/execute @p[score_status_min=10] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ fill ~31 ~-5 ~-8 ~ ~-5 ~8 planks 2
+/execute @p[score_status_min=10] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ fill ~31 ~-4 ~-8 ~ ~-4 ~8 stained_glass
+/execute @p[score_status_min=10] ~ ~ ~ execute @e[name=SynthWizard] ~ ~ ~ setblock ~ ~-5 ~8 command_block 0 replace {Command:"fill ~ ~ ~-1 ~ ~ ~-15 planks 2"}
+/execute @p[score_status_min=10] ~ ~ ~ execute @e[name=StartPos] ~ ~ ~ setblock ~5 ~1 ~7 tripwire_hook 2
+
+/execute @p[score_status_min=10] ~ ~ ~ tp @p @e[name=StartPos]
+/execute @p[score_status_min=10] ~ ~ ~ kill @e[name=StartPos]
+/execute @p[score_status_min=10] ~ ~ ~ kill @e[name=SynthWorker]
+/execute @p[score_status_min=10] ~ ~ ~ kill @e[name=SynthWizard]
+/execute @p[score_status_min=10] ~ ~ ~ /tellraw @a ["\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",{"text":"Project completed! Teleporting back...","color":"green","bold":true}]
+/execute @p[score_status_min=10] ~ ~ ~ scoreboard players set @a status 8
