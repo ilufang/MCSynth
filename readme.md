@@ -21,3 +21,34 @@ This project works as "One-Command mod", however, as the code is very long, the 
 5. Look around and look for a single command block. It should be located within 6 blocks in positive Z direction.
 6. Copy&Paste soundfont code into it and activate in the same way as Step2. Find more about soundfonts in the [Soundfonts](#SoundFonts) section
 7. If you need multiple soundfonts, continue installation. You can always find a commandblock placed for you in the Z+ direction.
+
+## Pre-settings
+
+This mod only works in **SINGLEPLAYER** with **CHEAT COMMANDS ENABLED**.
+Always start a new world as it can overwrite structures.
+After the machine is assembled, several settings will be changed:
+
+* Difficulty is set to peaceful
+* Mobs will not spawn
+* Entities around you will be removed automatically
+* Fire will not expand
+* Killed entities will not drop
+* Commandblock messages and command feedbacks will not be shown
+
+## Building
+
+### Beginning
+
+1. Before starting, fly towards positive Z or negative Z for at lease 20 blocks. Any structure may be destroyed in the X direction so make sure the track won't overlap the commandblocks.
+2. Look at your inventory, you should have been given a Chiken Spawn Egg with name START. You can begin building by placing it and a track will be built starting from the designated position.
+3. If you cannot find the egg, just grab one from your creative inventory and name it "START" (case-sensitive) with an anvil. Do **NOT** `/summon` as the coordinates will be inaccurate.
+4. Before placing, find a block that has is in the middle of the chunk. In debug screen (F3) find "Chunk: X1 Y1 Z1 in X2 Y2 Z2", the block should have Z1=7or8 and 2<Y1<10. (X1, X2, Y2, Z2 does not matter)
+5. Place the egg!
+
+### Working
+
+Just follow the guide in your chat message. The position of the snowman indicates where the next block will be placed.
+Click on the roll to move the snowman. The piano notes screen will be brought up at the same time. The snowman will be moved automatically forward after a note is placed.
+Click Next/Previous to quickly move between areas(bars), make sure to use Next to allocate new areas. Do not stick on the piano notes screen as new areas will NOT be initialized in this way.
+If you set your notelength, more than one block will be placed, wait for the snowman to stop before performing any operation. If you do not use a custom generated soundfont, do *NOT* set notelength to more than 1(1/32 note)
+
