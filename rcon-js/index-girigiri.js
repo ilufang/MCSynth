@@ -1,3 +1,5 @@
+var girigiri = true;
+
 // Dependencies
 var Midifile = require("./jasmid/midifile.js");
 var Rcon = require("./node-rcon.js").newHandle;
@@ -310,7 +312,7 @@ var timesig = {};
 var keysig = {};
 var instrument = [];
 var overrideParams = true;
-var direction = "x+"; // Custom directions not supported yet, do not edit
+var direction = "x+";
 var realtime = 0;
 
 // Play unit
@@ -535,6 +537,11 @@ function generatePlaysoundCmd(evt) {
 //		console.log(evt.track+"@"+volume);
 	}
 
+	if (girigiri) {
+		volume = [0, 72, 64, 128][evt.track]/128;
+		volumemin = volume;
+	}
+
 	volume *= evt.velocity/96; // Reflect velocity into volume (longer = louder)
 
 	var panx = 0;
@@ -564,6 +571,45 @@ function generatePlaysoundCmd(evt) {
 	}
 	soundname += ".";
 	soundname += scope;
+
+	if (girigiri && evt.track == 3) {
+		// Render as drum (Minecraft sound)
+		var drum_mapping = {
+			"4/9": "random.explode",	// A2	significant light
+			"4/1": "random.explode",	// C#2	significant light
+			"4/0": "mob.irongolem.hit",	// C2	significant heavy
+			"3/11": "mob.irongolem.hit",	// B1	significant heavy
+			"3/10": "mob.blaze.hit",		// A#1  floating light sound `mob.blaze.hit`
+			"3/8": "random.orb", // Or click?	// G#1  floating light sound `dig.glass`
+			"3/7": "random.eat",		// G1
+			"3/6": "random.orb",		// F#1  floating light sound `random.click`
+			"3/4": "mob.irongolem.hit",	// E1
+			"3/2": "game.player.hurt",	// D1	major lighter
+			"3/0": "dig.grass", // C1	major heavier
+			"2/10": "random.break"		// A#0
+		};
+		soundname = drum_mapping[scope+"/"+note%12];
+		// soundname = "";
+		pitch = 1;
+		switch (soundname) {
+			case "mob.blaze.hit":
+				volume *= 0.8;
+				break;
+			case "random.click":
+			case "random.orb":
+				volume *= 0.7;
+				break;
+			case "random.explode":
+				volume *= 2.5;
+				break;
+			case "dig.grass":
+				volume *= 1.4;
+				break;
+			case "game.player.hurt":
+				volume *= 0.8;
+				break;
+		}
+	}
 
 	var cmd = "execute @a ~ ~ ~ playsound "+soundname+" @p ~"+panx+" ~ ~"+panz+" "+volume+" "+pitch/*+" "+volumemin*/;
 	console.log(cmd);

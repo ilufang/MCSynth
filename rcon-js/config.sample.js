@@ -36,6 +36,7 @@ module.exports = {
 		},
 
 		// style: control the blocks used in building
+		// WARNING: not used in current version
 		style: {
 			// border: the case and track
 			border: "barrier"
@@ -70,11 +71,13 @@ module.exports = {
 		// "layered": Layered version of "path". For MIDIs slightly more complex that "path" can handle (max 158 simultanoes notes). Recommend Normal world
 		// "chunk": Maximize space usage and sacrifice appearance. For complex MIDIs (symphony/black, max 192 simultanoes notes). Recommend Superflat world
 		// Note: MCSynth can put down this number of notes DOES NOT mean your Minecraft can play all of them perfectly. Please consider your configuration.
+		// Warning: not used in current version
 		scheme: "path",
 
 		// timing: whether commandblock positioning should be beat-based or time-based
 		// "beat": synchronize the beats to the Minecraft gametick. BPM will be overriden to the nearest possible values.
 		// "time": approximate the original event to the nearest gametick. Best restoration but may cause slight noticeable inaccuracy
+		// Warning: not used in current version
 		timing: "beat"
 	}
 }
